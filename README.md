@@ -17,9 +17,11 @@ usage: script.py [-h] [-i [INPUT]] [-o [OUTPUT]]
 optional arguments:
   -h, --help            show this help message and exit
   -i [INPUT], --input [INPUT]
-                        directory to search for tagged markdown files (default: current working directory)
+                        directory to search for tagged markdown files
+                        default: current working directory
   -o [OUTPUT], --output [OUTPUT]
-                        output file path for summary report, relative to search directory (default: 'task-tracker.md' in search directory)
+                        output file path for summary report
+                        default: ./task-tracker.md
 ```
 > Tip: Set up an alias/cron job to streamline your workflow further!
 
