@@ -30,16 +30,28 @@ class TagTracker:
         self.output_path = output_path
         self.tags = defaultdict(list)
         self.phases = ["to-do", "in-progress", "finished"]
+        self.settings = None
 
     def __call__(self):
         """
         analyze directory and output task report
         """
 
+        self.__parse_settings()
         print(f"{bcolors.OKCYAN}Analyzing...")
         self.index(self.dir, set())
         print(f"{bcolors.OKCYAN}Generating Report...")
         self.output()
+
+    def __parse_settings(self):
+        """
+        parse settings.json and write object to self.settings
+        """
+
+        path = os.path.join(os.path.split(os.path.dirname(__file__))[0], "settings.json")
+        if os.path.isfile(path):
+            with open(path) as settings:
+                self.settings = json.load(settings)
 
     def index(self, directory: str, found_files: set):
         """
@@ -104,15 +116,22 @@ class TagTracker:
         res = ""
         cal = calendar.Calendar()
         today = datetime.today()
+        emdbed_str = (
+            "!" if self.settings and self.settings["embedPagesInDailyView"] else ""
+        )
 
-        def output_summary(f: str, key):
+        def output_summary(key):
             dirpath = os.path.join(self.dir, cal_dir)
             if not os.path.isdir(dirpath):
                 os.makedirs(dirpath)
 
-            filepath = os.path.join(dirpath, f"{filename}")
+            filepath = os.path.join(dirpath, f"{key}.md")
             with open(filepath, "w") as output_file:
-                output_file.write(f"*{key}*\n\n" + "\n".join(self.tags[key]) + "\n")
+                output_file.write(
+                    f"*{key}*\n\n{emdbed_str}"
+                    + f"\n{emdbed_str}".join(self.tags[key])
+                    + "\n"
+                )
 
         # get list of tuples representing weeks in current month
         weeks = cal.monthdatescalendar(today.year, today.month)
@@ -132,10 +151,11 @@ class TagTracker:
                 if self.tags.get(key):
 
                     # create summary file
+                    output_summary(key)
+
                     filename = f"{key}.md"
-                    output_summary(filename, key)
                     # md link to summary file
-                    res += (1 - day.day // 10) * " "
+                    res += " " * (1 - day.day // 10)
                     res += f" [{day.day}]({cal_dir}/{filename})"
 
                 else:
