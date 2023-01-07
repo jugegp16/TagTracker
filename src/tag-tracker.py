@@ -17,7 +17,7 @@ class bcolors:
 
 
 class TagTracker:
-    def __init__(self, directory: os.path, output_path: os.path) -> None:
+    def __init__(self, directory: str, output_path: str) -> None:
         """
         initialize tag tracker
 
@@ -48,7 +48,9 @@ class TagTracker:
         parse settings.json and write object to self.settings
         """
 
-        path = os.path.join(os.path.split(os.path.dirname(__file__))[0], "settings.json")
+        path = os.path.join(
+            os.path.split(os.path.dirname(__file__))[0], "settings.json"
+        )
         if os.path.isfile(path):
             with open(path) as settings:
                 self.settings = json.load(settings)
@@ -95,7 +97,8 @@ class TagTracker:
                             tag = tag[1:]
 
                             if "#" not in tag:
-                                formatted = f"[[{file_path.split('/')[-1][:-3]}]]"
+                                rel_path: str = os.path.relpath(file_path, self.dir)
+                                formatted = f"[{file_path.split('/')[-1][:-3]}]({rel_path.replace(' ', '%20')})"
                                 self.tags[tag].append(formatted)
 
             # recursively search subdirectories
@@ -220,7 +223,7 @@ class TagTracker:
             json_str = json.load(workspace)
 
             files = map(
-                lambda i: f"[[{i.split('/')[-1]}]]",
+                lambda i: f"[{i.split('/')[-1]}]({i.replace(' ', '%20')})",
                 filter(
                     lambda filename: os.path.isfile(os.path.join(self.dir, filename)),
                     json_str["lastOpenFiles"],
@@ -271,10 +274,13 @@ class TagTracker:
                         lambda i: f"{i[0]} ({len(i[1])})",
                         sorted(
                             filter(
-                                lambda i: not bool(re.search(r"\d", str(i))),
+                                lambda i: not bool(
+                                    re.search(r"\d{4}-\d{2}-\d{2}", i[0])
+                                ),
                                 self.tags.items(),
                             ),
-                            key=lambda i: i[1],
+                            key=lambda i: len(i[1]),
+                            reverse=True,
                         ),
                     )
                 )
@@ -312,8 +318,8 @@ if __name__ == "__main__":
         "-o",
         "--output",
         nargs="?",
-        help="output file path for summary report\ndefault: ./task-tracker.md",
-        default=os.path.join(os.getcwd(), "task-tracker.md"),
+        help="output file path for summary report\ndefault: ./tag-tracker.md",
+        default=os.path.join(os.getcwd(), "tag-tracker.md"),
     )
 
     args = parser.parse_args()

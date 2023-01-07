@@ -3,7 +3,7 @@ Efficiently track and organize tagged markdown files.
 
 ### How to Use
 ```shell
-usage: script.py [-h] [-i [INPUT]] [-o [OUTPUT]]
+usage: tag-tracker.py [-h] [-i [INPUT]] [-o [OUTPUT]]
 
         ████████  █████   ██████  ████████ ██████   █████   ██████ ██   ██ ███████ ██████
            ██    ██   ██ ██          ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██
@@ -23,7 +23,7 @@ optional arguments:
                         output file path for summary report
                         default: ./task-tracker.md
 ```
-> Tip: Set up an alias/cron job to streamline your workflow further!
+> Tip: Set up an AutoHotKey, alias, and/or cron job to streamline your workflow further!
 
 ### Features
 - Monthly calendar view
