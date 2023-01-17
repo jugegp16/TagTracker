@@ -1,7 +1,7 @@
 # TagTracker: A Markdown Task Management Tool
 Efficiently track and organize tagged markdown files.
 
-### How to Use
+## How to Use
 ```shell
 usage: tag-tracker.py [-h] [-i [INPUT]] [-o [OUTPUT]]
 
@@ -21,15 +21,25 @@ optional arguments:
                         default: current working directory
   -o [OUTPUT], --output [OUTPUT]
                         output file path for summary report
-                        default: ./task-tracker.md
+                        default: ./tag-tracker.md
 ```
-> Tip: Set up an AutoHotKey, alias, and/or cron job to streamline your workflow further!
+## Recommended Setup
+### Markdown Users
+- Create a hotkey on your system or favorite note editor
+- Set up an alias in your shell setup file
+    - `alias task='Python3 /path/tag-tracker.py -i /path/to/notes -o /path/to/notes/tag-tracker.md'`
 
-### Features
+### Obsidian Users
+1. Download [obsidian-shellcommands](https://github.com/Taitava/obsidian-shellcommands) community plugin
+2. Enter new shell command
+    - `Python3 /path/tag-tracker.py -i /path/to/notes -o /path/to/notes/tag-tracker.md`
+3. Go to hotkey settings and create a shortcut (e.g cmd + o)
+
+## Features
 - Monthly calendar view
 - Kanban-style task board
 - Recently opened files
 - Tagged file list
 
-### Requirements
+## Requirements
 - Python 3.x
