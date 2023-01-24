@@ -17,17 +17,17 @@ class bcolors:
 
 
 class TagTracker:
-    def __init__(self, directory: str, output_path: str) -> None:
+    def __init__(self, directory: str, output_name: str) -> None:
         """
         initialize tag tracker
 
         Args:
-            directory (os.path): search directory
-            output_path (os.path): output file path for report
+            directory (str): search directory
+            output_name (str): output file name
         """
 
         self.dir = directory
-        self.output_path = output_path
+        self.output_name = output_name
         self.tags = defaultdict(list)
         self.phases = ["to-do", "in-progress", "finished"]
         self.settings = None
@@ -240,7 +240,7 @@ class TagTracker:
         write report to output file
         """
 
-        with open(self.output_path, "w") as output_file:
+        with open(os.path.join(self.dir, self.output_name), "w") as output_file:
 
             # section line
             output_file.write("----\n")
@@ -289,7 +289,7 @@ class TagTracker:
 
             print(
                 f"{bcolors.OKGREEN}Success!\n",
-                f"\t{bcolors.GREY}Wrote Summary to {self.output_path}\n",
+                f"\t{bcolors.GREY}Wrote Summary to {os.path.join(self.dir, self.output_name)}\n",
             )
 
 
@@ -318,12 +318,12 @@ if __name__ == "__main__":
         "-o",
         "--output",
         nargs="?",
-        help="output file path for summary report\ndefault: ./tag-tracker.md",
-        default=os.path.join(os.getcwd(), "tag-tracker.md"),
+        help="output file name for summary report\ndefault: tag-tracker.md",
+        default="tag-tracker.md",
     )
 
     args = parser.parse_args()
-    input_dir, output_path = args.input, args.output
+    input_dir, output_name = args.input, args.output
 
-    tracker = TagTracker(input_dir, output_path)
+    tracker = TagTracker(input_dir, output_name)
     tracker()

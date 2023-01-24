@@ -20,19 +20,19 @@ optional arguments:
                         directory to search for tagged markdown files
                         default: current working directory
   -o [OUTPUT], --output [OUTPUT]
-                        output file path for summary report
-                        default: ./tag-tracker.md
+                        output file name for summary report
+                        default: tag-tracker.md
 ```
 ## Recommended Setup
 ### Markdown Users
 - Create a hotkey on your system or favorite note editor
 - Set up an alias in your shell setup file
-    - `alias task='Python3 /path/tag-tracker.py -i /path/to/notes -o /path/to/notes/tag-tracker.md'`
+    - `alias task='Python3 /path/tag-tracker.py -i /path/to/notes'`
 
 ### Obsidian Users
 1. Download [obsidian-shellcommands](https://github.com/Taitava/obsidian-shellcommands) community plugin
 2. Enter new shell command
-    - `Python3 /path/tag-tracker.py -i /path/to/notes -o /path/to/notes/tag-tracker.md`
+    - `Python3 /path/tag-tracker.py -i /path/to/notes`
 3. Go to hotkey settings and create a shortcut (e.g cmd + o)
 
 ## Features
