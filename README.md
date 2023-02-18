@@ -35,6 +35,24 @@ optional arguments:
     - `Python3 /path/tag-tracker.py -i /path/to/notes`
 3. Go to hotkey settings and create a shortcut (e.g cmd + o)
 
+
+```json
+{
+    "file name": {
+        "cal": null,
+        "kan-ban": {
+            "options": [
+                "to-do",
+                "in-progress",
+                "finished"
+            ]
+        },
+        "last-opened": null,
+        "tag-summary": null
+    }
+}
+```
+
 ## Features
 - Monthly calendar view
 - Kanban-style task board

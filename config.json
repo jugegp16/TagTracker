@@ -1,0 +1,25 @@
+{
+    "tag-tracker": {
+        "cal": null,
+        "kan-ban": {
+            "options": [
+                "to-do",
+                "in-progress",
+                "finished"
+            ]
+        },
+        "last-opened": null,
+        "tag-summary": null
+    },
+    "Notes/dev-tracker": {
+        "cal": null,
+        "kan-ban": {
+            "options": [
+                "to-do",
+                "in-progress",
+                "finished"
+            ],
+            "filter": "dev"
+        }
+    }
+}
