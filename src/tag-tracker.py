@@ -1,6 +1,7 @@
 import argparse
 import calendar
 import json
+import logging
 import os
 import re
 from collections import defaultdict
@@ -18,14 +19,6 @@ class bcolors:
 
 class TagTracker:
     def __init__(self, directory: str, output_name: str) -> None:
-        """
-        initialize tag tracker
-
-        Args:
-            directory (str): search directory
-            output_name (str): output file name
-        """
-
         self.dir = directory
         self.output_name = output_name
         self.tags = defaultdict(list)
@@ -33,14 +26,10 @@ class TagTracker:
         self.settings = None
 
     def __call__(self):
-        """
-        analyze directory and output task report
-        """
-
         self.__parse_settings()
-        print(f"{bcolors.OKCYAN}Analyzing...")
+        logging.info(f"{bcolors.OKCYAN}Analyzing...")
         self.index(self.dir, set())
-        print(f"{bcolors.OKCYAN}Generating Report...")
+        logging.info(f"{bcolors.OKCYAN}Generating Report...")
         self.output()
 
     def __parse_settings(self):
@@ -67,12 +56,13 @@ class TagTracker:
         if not os.path.isdir(directory) or ".git" in directory:
             return
 
-        print(f"{bcolors.GREY}\tSearching {bcolors.UNDERLINE}{directory}{bcolors.ENDC}")
+        logging.info(
+            f"{bcolors.GREY}\tSearching {bcolors.UNDERLINE}{directory}{bcolors.ENDC}"
+        )
 
         # search all files in directory
         for root, dirs, files in os.walk(directory):
             for filename in files:
-
                 # open file and read contents
                 file_path = os.path.join(root, filename)
                 if file_path not in found_files:
@@ -82,12 +72,11 @@ class TagTracker:
                     if ".md" not in filename:
                         continue
 
-                    print(
+                    logging.info(
                         f"{bcolors.GREY}\t\tIndexing {bcolors.UNDERLINE}{filename}{bcolors.ENDC}"
                     )
 
                     with open(file_path, "r") as f:
-
                         # search for tags using regex
                         contents = f.read()
                         tags = re.findall(r"#\S+", contents)
@@ -148,11 +137,9 @@ class TagTracker:
         # add day numbers
         for week in weeks:
             for i, day in enumerate(week):
-
                 # check for tasks on this day
                 key = day.strftime("%Y-%m-%d")
                 if self.tags.get(key):
-
                     # create summary file
                     output_summary(key)
 
@@ -166,7 +153,7 @@ class TagTracker:
                     if day.month == today.month:
                         res += f"{day.day:3}"
                     else:
-                        res += f"  ."
+                        res += "  ."
 
                 res += " |" if i < len(week) - 1 else ""
 
@@ -193,10 +180,8 @@ class TagTracker:
                     continue
 
                 for f in os.listdir(d):
-
                     tmp_path = os.path.join(d, f)
                     if os.path.isfile(tmp_path):
-
                         if workspace_subpath in tmp_path:
                             res = tmp_path
                             break
@@ -216,7 +201,9 @@ class TagTracker:
         )
 
         if not workspace_path:
-            print(f"{bcolors.WARNING}\tError: No Obsidian workspace.json Detected")
+            logging.warning(
+                f"{bcolors.WARNING}\tError: No Obsidian workspace.json Detected"
+            )
             return res
 
         with open(workspace_path) as workspace:
@@ -239,18 +226,16 @@ class TagTracker:
         """
         write report to output file
         """
-
         with open(os.path.join(self.dir, self.output_name), "w") as output_file:
-
             # section line
             output_file.write("----\n")
 
             # calendar
-            print(f"{bcolors.GREY}\tCreating Calendar")
+            logging.info(f"{bcolors.GREY}\tCreating Calendar")
             output_file.writelines(self.calendar())
 
             # phase list
-            print(f"{bcolors.GREY}\tCreating Kanban")
+            logging.info(f"{bcolors.GREY}\tCreating Kanban")
             for tag, file_paths in sorted(
                 filter(lambda i: i[0] in self.phases, self.tags.items()),
                 key=lambda i: self.phases.index(i[0]),
@@ -262,11 +247,11 @@ class TagTracker:
                 output_file.write(f"\n\n### {title}\n- " + "\n- ".join(file_paths))
 
             # last opened files
-            print(f"{bcolors.GREY}\tCreating Recently Opened")
+            logging.info(f"{bcolors.GREY}\tCreating Recently Opened")
             output_file.write(self.last_opened())
 
             # tags
-            print(f"{bcolors.GREY}\tCreating Tag List")
+            logging.info(f"{bcolors.GREY}\tCreating Tag List")
             output_file.write(
                 "\n\n\n----\n*"
                 + ", ".join(
@@ -287,10 +272,13 @@ class TagTracker:
                 + "*\n\n"
             )
 
-            print(
-                f"{bcolors.OKGREEN}Success!\n",
-                f"\t{bcolors.GREY}Wrote Summary to {os.path.join(self.dir, self.output_name)}\n",
-            )
+        logging.info(
+            f"{bcolors.OKGREEN}Success!\n\t",
+            f"{bcolors.GREY}Wrote summary to\n",
+            os.path.join(self.dir, self.output_name),
+        )
+
+        print(f"Updated {self.output_name}")
 
 
 if __name__ == "__main__":
@@ -321,8 +309,15 @@ if __name__ == "__main__":
         help="output file name for summary report\ndefault: tag-tracker.md",
         default="tag-tracker.md",
     )
+    parser.add_argument(
+        "-log",
+        "--loglevel",
+        default="warning",
+        help="Provide logging level. Example --loglevel debug, default=warning",
+    )
 
     args = parser.parse_args()
+    logging.basicConfig(level=args.loglevel.upper())
     input_dir, output_name = args.input, args.output
 
     tracker = TagTracker(input_dir, output_name)
