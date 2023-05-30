@@ -1,3 +1,4 @@
 {
-    "embedPagesInDailyView": false
+    "embedPagesInDailyView": false,
+    "calendarDirectory": "Calendar"
 }
