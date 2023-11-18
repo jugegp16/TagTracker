@@ -72,14 +72,6 @@ class TagTracker:
 
     def calendar(self, as_of_date: datetime.date, cal_dir="-"):
         """create calendar view for current month"""
-        res = ""
-        cal = calendar.Calendar()
-        emdbed_str = "!" if self.settings["embedPagesInDailyView"] else ""
-        cal_dir = (
-            self.settings["calendarDirectory"]
-            if self.settings["calendarDirectory"]
-            else cal_dir
-        )
 
         def output_summary(key):
             dirpath = os.path.join(self.dir, cal_dir)
@@ -93,11 +85,20 @@ class TagTracker:
             with open(filepath, "w") as output_file:
                 output_file.write(content)
 
+        res = ""
+        cal = calendar.Calendar()
+        emdbed_str = "!" if self.settings["embedPagesInDailyView"] else ""
+        cal_dir = (
+            self.settings["calendarDirectory"]
+            if self.settings["calendarDirectory"]
+            else cal_dir
+        )
+
         # get list of tuples representing weeks in current month
         weeks = cal.monthdatescalendar(as_of_date.year, as_of_date.month)
 
         # generate calendar header
-        res += f"{as_of_date.strftime('%B')} {as_of_date.year}" + "\n\n"
+        res += f"**{as_of_date.strftime('%B')} {as_of_date.year}**" + "\n\n"
         for i, day in enumerate(weeks[0]):
             res += f'{day.strftime("%a")}'
             res += " | " if i < len(weeks[0]) - 1 else ""
@@ -147,7 +148,7 @@ class TagTracker:
             ),
         )
 
-        return "\n\n\n----\n\n**Last Opened**\n- " + "\n- ".join(files)
+        return "\n\n----\n\n**Last Opened**\n- " + "\n- ".join(files)
 
     def kan_ban(self):
         """create kan ban board"""
@@ -163,41 +164,25 @@ class TagTracker:
                 continue
 
             title = " ".join(map(lambda i: i.capitalize(), tag.split("-")))
-            res += f"\n\n### {title}\n- " + "\n- ".join(file_paths[:max_files])
+            res += f"\n\n**{title}**\n- " + "\n- ".join(file_paths[:max_files])
 
         return res
-
-    def tag_list(self):
-        cleaned_tags = map(
-            lambda i: f"{i[0]} ({len(i[1])})",
-            sorted(
-                filter(
-                    lambda i: not bool(re.search(r"\d{4}-\d{2}-\d{2}", i[0])),
-                    self.tags.items(),
-                ),
-                key=lambda i: len(i[1]),
-                reverse=True,
-            ),
-        )
-        return f"\n\n\n----\n*{', '.join(cleaned_tags)}*\n\n"
 
     def output(self):
         """write report to output file"""
         with open(os.path.join(self.dir, self.output_name), "w") as output_file:
-
             logging.info(f"{bcolors.GREY}\tCreating Calendar")
             for i in range(self.num_months, 0, -1):
                 delta = timedelta(weeks=(i - 1) * 4)
-                output_file.writelines(self.calendar(datetime.today() - delta))
+                output_file.write(self.calendar(datetime.today() - delta))
 
-            logging.info(f"{bcolors.GREY}\tCreating Kanban")
-            output_file.write(self.kan_ban())
+            kan_ban = self.kan_ban()
+            if kan_ban:
+                logging.info(f"{bcolors.GREY}\tCreating Kanban")
+                output_file.write("\n---" + kan_ban)
 
             logging.info(f"{bcolors.GREY}\tCreating Recently Opened")
             output_file.write(self.last_opened())
-
-            logging.info(f"{bcolors.GREY}\tCreating Tag List")
-            output_file.write(self.tag_list())
 
         logging.info(
             f"{bcolors.OKGREEN}Success!\n\t{bcolors.GREY}Wrote summary to\n"
