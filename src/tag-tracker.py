@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import utils
 
 
@@ -18,9 +18,10 @@ class bcolors:
 
 
 class TagTracker:
-    def __init__(self, directory: str, output_name: str) -> None:
+    def __init__(self, directory: str, output_name: str, num_months: int) -> None:
         self.dir = directory
         self.output_name = output_name
+        self.num_months = num_months
         self.tags = defaultdict(list)
         self.phases = ["to-do", "in-progress", "finished"]
         self.settings = utils.get_settings()
@@ -69,11 +70,10 @@ class TagTracker:
             for subdir in dirs:
                 self.index(os.path.join(directory, subdir), found_files)
 
-    def calendar(self, cal_dir="-"):
+    def calendar(self, as_of_date: datetime.date, cal_dir="-"):
         """create calendar view for current month"""
         res = ""
         cal = calendar.Calendar()
-        today = datetime.today()
         emdbed_str = "!" if self.settings["embedPagesInDailyView"] else ""
         cal_dir = (
             self.settings["calendarDirectory"]
@@ -94,9 +94,10 @@ class TagTracker:
                 output_file.write(content)
 
         # get list of tuples representing weeks in current month
-        weeks = cal.monthdatescalendar(today.year, today.month)
+        weeks = cal.monthdatescalendar(as_of_date.year, as_of_date.month)
 
         # generate calendar header
+        res += f"{as_of_date.strftime('%B')} {as_of_date.year}" + "\n\n"
         for i, day in enumerate(weeks[0]):
             res += f'{day.strftime("%a")}'
             res += " | " if i < len(weeks[0]) - 1 else ""
@@ -112,13 +113,13 @@ class TagTracker:
                     output_summary(key)
 
                     filename = f"{key}.md"
-                    # md link to summary file
+                    # create a markdown link to the summary file
                     res += " " * (1 - day.day // 10)
                     res += f" [{day.day}]({cal_dir}/{filename})"
 
                 else:
-                    # add day number or empty string if day is not in current month
-                    if day.month == today.month:
+                    # add day number if in current month
+                    if day.month == as_of_date.month:
                         res += f"{day.day:3}"
                     else:
                         res += "  ."
@@ -127,7 +128,7 @@ class TagTracker:
 
             res += "\n"
 
-        return res
+        return res + "\n"
 
     def last_opened(self):
         """create last opened files table for obsidian users"""
@@ -183,10 +184,11 @@ class TagTracker:
     def output(self):
         """write report to output file"""
         with open(os.path.join(self.dir, self.output_name), "w") as output_file:
-            output_file.write("----\n")
 
             logging.info(f"{bcolors.GREY}\tCreating Calendar")
-            output_file.writelines(self.calendar())
+            for i in range(self.num_months, 0, -1):
+                delta = timedelta(weeks=(i - 1) * 4)
+                output_file.writelines(self.calendar(datetime.today() - delta))
 
             logging.info(f"{bcolors.GREY}\tCreating Kanban")
             output_file.write(self.kan_ban())
@@ -223,26 +225,31 @@ if __name__ == "__main__":
         "-i",
         "--input",
         nargs="?",
-        help="directory to search for tagged markdown files\ndefault: current working directory",
+        help="directory to search for tagged markdown files, default='.'",
         default=os.getcwd(),
     )
     parser.add_argument(
         "-o",
         "--output",
         nargs="?",
-        help="output file name for summary report\ndefault: tag-tracker.md",
+        help="output file name for summary report, default='tag-tracker.md'",
         default="tag-tracker.md",
     )
     parser.add_argument(
         "-log",
         "--loglevel",
         default="warning",
-        help="Provide logging level. Example --loglevel debug, default=warning",
+        help="provide logging level. Example --loglevel debug, default=warning",
+    )
+    parser.add_argument(
+        "-m",
+        "--months",
+        default=1,
+        type=int,
+        help="number of months generated in the calendar report",
     )
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel.upper())
-    input_dir, output_name = args.input, args.output
-
-    tracker = TagTracker(input_dir, output_name)
+    tracker = TagTracker(args.input, args.output, args.months)
     tracker()
