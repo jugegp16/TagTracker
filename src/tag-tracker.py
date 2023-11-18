@@ -7,6 +7,20 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import utils
 
+DESCRIPTION = """
+
+    ████████  █████   ██████  ████████ ██████   █████   ██████ ██   ██ ███████ ██████  
+        ██    ██   ██ ██          ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
+        ██    ███████ ██   ███    ██    ██████  ███████ ██      █████   █████   ██████  
+        ██    ██   ██ ██    ██    ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
+        ██    ██   ██  ██████     ██    ██   ██ ██   ██  ██████ ██   ██ ███████ ██   ██ 
+
+                            A Markdown Task Management Tool
+
+    Example Usage:
+        Python3 tag-tracker.py -i ~/Documents/notes/ -o Readme.md -m 2
+"""
+
 
 class bcolors:
     GREY = "\033[90m"
@@ -93,7 +107,6 @@ class TagTracker:
             if self.settings["calendarDirectory"]
             else cal_dir
         )
-
         # get list of tuples representing weeks in current month
         weeks = cal.monthdatescalendar(as_of_date.year, as_of_date.month)
 
@@ -112,23 +125,18 @@ class TagTracker:
                 if self.tags.get(key):
                     # create summary file
                     output_summary(key)
-
                     filename = f"{key}.md"
                     # create a markdown link to the summary file
                     res += " " * (1 - day.day // 10)
                     res += f" [{day.day}]({cal_dir}/{filename})"
-
                 else:
                     # add day number if in current month
                     if day.month == as_of_date.month:
                         res += f"{day.day:3}"
                     else:
                         res += "  ."
-
                 res += " |" if i < len(week) - 1 else ""
-
             res += "\n"
-
         return res + "\n"
 
     def last_opened(self):
@@ -194,16 +202,7 @@ class TagTracker:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="""
-
-        ████████  █████   ██████  ████████ ██████   █████   ██████ ██   ██ ███████ ██████  
-           ██    ██   ██ ██          ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
-           ██    ███████ ██   ███    ██    ██████  ███████ ██      █████   █████   ██████  
-           ██    ██   ██ ██    ██    ██    ██   ██ ██   ██ ██      ██  ██  ██      ██   ██ 
-           ██    ██   ██  ██████     ██    ██   ██ ██   ██  ██████ ██   ██ ███████ ██   ██ 
-
-                                A Markdown Task Management Tool
-        """,
+        description=DESCRIPTION,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
