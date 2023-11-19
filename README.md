@@ -27,19 +27,18 @@ optional arguments:
 ### Markdown Users
 - Create a hotkey on your system or favorite note editor
 - Set up an alias in your shell setup file
-    - `alias task='Python3 /path/tag-tracker.py -i /path/to/notes'`
+    - `alias task='Python3 /path/to/tag-tracker.py -i /path/to/notes'`
 
 ### Obsidian Users
 1. Download [obsidian-shellcommands](https://github.com/Taitava/obsidian-shellcommands) community plugin
 2. Enter new shell command
     - `Python3 /path/tag-tracker.py -i /path/to/notes`
-3. Go to hotkey settings and create a shortcut (e.g cmd + o)
+3. Go to hotkey settings and create a shortcut (e.g cmd + s)
 
 ## Features
 - Monthly calendar view
 - Kanban-style task board
 - Recently opened files
-- Tagged file list
 
 ## Requirements
 - Python 3.x
